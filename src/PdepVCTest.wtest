@@ -1,0 +1,24 @@
+import Carpeta.*
+import Archivo.*
+
+describe "PdePVC" {
+	
+	var foodir
+	var bartxt
+	var baztxt
+	
+	fixture {
+		bartxt = new Archivo(nombre = "bar.txt", contenido = "Buen día!")
+		baztxt = new Archivo(nombre = "baz.txt", contenido = "Buenas noches!")
+		foodir = new Carpeta(nombre = "Foo", archivos = [bartxt, baztxt])
+	}
+	
+	test "Punto 1 - Una carpeta tiene un archivo específico" {
+		assert.that(foodir.tiene("bar.txt"))
+	}
+	
+	test "Punto 1 - Una carpeta no tiene un archivo específico" {
+		assert.notThat(foodir.tiene("sas.txt"))
+	}
+	
+}
