@@ -7,7 +7,7 @@ class Carpeta {
 	const property archivos = []
 
 	method tiene(unNombreArchivo) {
-		return archivos.any{ archivo => archivo.nombre().equals(unNombreArchivo) }
+		return archivos.any{ archivo => archivo.es(unNombreArchivo) }
 	}
 
 	method crearArchivo(unNombre) {

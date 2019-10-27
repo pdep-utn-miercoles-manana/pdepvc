@@ -6,7 +6,7 @@ class Usuario {
 	var rol
 
 	method crearBranch(unosColaboradores) {
-		return new Branch(colaboradores = [self] + unosColaboradores)
+		return new Branch(colaboradores = unosColaboradores.copyWith(self))
 	}
 
 	method puedeCommitearEn(unaBranch) {
