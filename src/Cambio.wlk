@@ -17,6 +17,10 @@ class Cambio {
 		return unaCarpeta.tiene(nombreArchivo)
 	}
 
+	method afectaArchivoLlamado(unNombre) {
+		return unNombre.equals(nombreArchivo)
+	}
+
 	method realizarseEn(unaCarpeta)
 
 }
@@ -31,12 +35,20 @@ class Crear inherits Cambio {
 		unaCarpeta.crearArchivo(nombreArchivo)
 	}
 
+	method revert() {
+		return new Eliminar(nombreArchivo = nombreArchivo)
+	}
+
 }
 
 class Eliminar inherits Cambio {
 
 	override method realizarseEn(unaCarpeta) {
 		unaCarpeta.eliminarArchivo(nombreArchivo)
+	}
+
+	method revert() {
+		return new Crear(nombreArchivo = nombreArchivo)
 	}
 
 }
@@ -49,6 +61,10 @@ class Agregar inherits Cambio {
 		unaCarpeta.agregarContenido(nombreArchivo, contenido)
 	}
 
+	method revert() {
+		return new Sacar(nombreArchivo = nombreArchivo, contenido = contenido)
+	}
+
 }
 
 class Sacar inherits Cambio {
@@ -59,7 +75,13 @@ class Sacar inherits Cambio {
 		unaCarpeta.sacarContenido(nombreArchivo, contenido)
 	}
 
+	method revert() {
+		return new Agregar(nombreArchivo = nombreArchivo, contenido = contenido)
+	}
+
 }
 
-class CambioException inherits Exception {}
+class CambioException inherits Exception {
+
+}
 

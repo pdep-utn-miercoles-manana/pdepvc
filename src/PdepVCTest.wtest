@@ -12,12 +12,12 @@ describe "PdePVC" {
 	var pdep
 	var commit
 	var otroCommit
+	var nuevoCommit
 	var master
 
 	fixture {
 		bartxt = new Archivo(nombre = "bar.txt", contenido = "Buen día!")
 		baztxt = new Archivo(nombre = "baz.txt", contenido = "Buenas noches!")
-		
 		foodir = new Carpeta(nombre = "Foo", archivos = [ bartxt, baztxt ])
 		pdep = new Carpeta(nombre = "pdep", archivos = [])
 		
@@ -32,6 +32,9 @@ describe "PdePVC" {
 		otroCommit = new Commit(descripcion = "Agrego parcial.wlk")
 		otroCommit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
 		otroCommit.agregarCambio(new Agregar(nombreArchivo = "parcial.wlk", contenido = "object pepita {}"))
+		
+		nuevoCommit = new Commit(descripcion = "Agrego archivo hola.txt")
+		nuevoCommit.agregarCambio(new Crear(nombreArchivo = "hola.txt"))
 		
 		master = new Branch(carpeta = pdep)
 		master.agregarCommit(commit)
@@ -72,9 +75,31 @@ describe "PdePVC" {
 	}
 
 	test "Punto 3 - Checkoutear una branch" {
-		master.checkout()	
+		master.checkout()
 		assert.equals(2, pdep.archivos().size())
 	}
 
-}
+	test "Punto 4 - log sobre un archivo que cambió en todos los commits de una branch" {
+		assert.equals([ commit, otroCommit ], master.log("parcial.wlk"))
+	}
 
+	test "Punto 4 - log sobre un archivo que cambió en un commit de una branch" {
+		master.agregarCommit(nuevoCommit)
+		assert.equals([ nuevoCommit ], master.log("hola.txt"))
+	}
+
+	test "Punto 4 - log sobre un archivo que no está en ningún commit de una branch" {
+		assert.equals([], master.log("chau.txt"))
+	}
+
+	test "Punto 5 - revert de un commit crea un commit con su descripción revertida" {
+		const commitRevertido = otroCommit.revert()
+		assert.equals("revert Agrego parcial.wlk", commitRevertido.descripcion())
+	}
+
+	test "Punto 5 - revert de un commit crea un commit con la misma cantidad de cambios" {
+		const commitRevertido = otroCommit.revert()
+		assert.equals(2, commitRevertido.cambios().size())
+	}
+
+}

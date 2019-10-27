@@ -11,4 +11,8 @@ class Branch {
 		commits.add(unCommit)
 	}
 
+	method log(unNombre) {
+		return commits.filter { commit => commit.afectaArchivoLlamado(unNombre) }
+	}
+
 }
