@@ -2,6 +2,7 @@ import Carpeta.*
 import Archivo.*
 import Commit.*
 import Cambio.*
+import Branch.*
 
 describe "PdePVC" {
 
@@ -10,6 +11,8 @@ describe "PdePVC" {
 	var baztxt
 	var pdep
 	var commit
+	var otroCommit
+	var master
 
 	fixture {
 		bartxt = new Archivo(nombre = "bar.txt", contenido = "Buen día!")
@@ -25,6 +28,14 @@ describe "PdePVC" {
 		commit.agregarCambio(new Eliminar(nombreArchivo = "parcial.wlk"))
 		commit.agregarCambio(new Agregar(nombreArchivo = "leame.md", contenido = "parciallala"))
 		commit.agregarCambio(new Sacar(nombreArchivo = "leame.md", contenido = "lala"))
+		
+		otroCommit = new Commit(descripcion = "Agrego parcial.wlk")
+		otroCommit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
+		otroCommit.agregarCambio(new Agregar(nombreArchivo = "parcial.wlk", contenido = "object pepita {}"))
+		
+		master = new Branch(carpeta = pdep)
+		master.agregarCommit(commit)
+		master.agregarCommit(otroCommit)
 	}
 
 	test "Punto 1 - Una carpeta tiene un archivo específico" {
@@ -58,6 +69,11 @@ describe "PdePVC" {
 	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede sacarse contenido a un archivo que no existe" {
 		commit.agregarCambio(new Sacar(nombreArchivo = "parcial.wlk", contenido = "hola"))
 		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+	}
+
+	test "Punto 3 - Checkoutear una branch" {
+		master.checkout()	
+		assert.equals(2, pdep.archivos().size())
 	}
 
 }

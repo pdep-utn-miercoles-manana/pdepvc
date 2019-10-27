@@ -10,4 +10,5 @@ class Commit {
 	method agregarCambio(unCambio) {
 		cambios.add(unCambio)
 	}
+
 }
