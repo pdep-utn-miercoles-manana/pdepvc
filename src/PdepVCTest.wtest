@@ -3,6 +3,7 @@ import Archivo.*
 import Commit.*
 import Cambio.*
 import Branch.*
+import Usuario.*
 
 describe "PdePVC" {
 
@@ -21,7 +22,7 @@ describe "PdePVC" {
 		foodir = new Carpeta(nombre = "Foo", archivos = [ bartxt, baztxt ])
 		pdep = new Carpeta(nombre = "pdep", archivos = [])
 		
-		commit = new Commit(descripcion = "Hago muchos cambios")
+		commit = new Commit(descripcion = "Hago muchos cambios", carpeta = pdep)
 		
 		commit.agregarCambio(new Crear(nombreArchivo = "leame.md"))
 		commit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
@@ -29,16 +30,17 @@ describe "PdePVC" {
 		commit.agregarCambio(new Agregar(nombreArchivo = "leame.md", contenido = "parciallala"))
 		commit.agregarCambio(new Sacar(nombreArchivo = "leame.md", contenido = "lala"))
 		
-		otroCommit = new Commit(descripcion = "Agrego parcial.wlk")
+		otroCommit = new Commit(descripcion = "Agrego parcial.wlk", carpeta = pdep)
 		otroCommit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
 		otroCommit.agregarCambio(new Agregar(nombreArchivo = "parcial.wlk", contenido = "object pepita {}"))
 		
-		nuevoCommit = new Commit(descripcion = "Agrego archivo hola.txt")
+		nuevoCommit = new Commit(descripcion = "Agrego archivo hola.txt", carpeta = pdep)
 		nuevoCommit.agregarCambio(new Crear(nombreArchivo = "hola.txt"))
 		
-		master = new Branch(carpeta = pdep)
+		master = new Branch()
 		master.agregarCommit(commit)
 		master.agregarCommit(otroCommit)
+		
 	}
 
 	test "Punto 1 - Una carpeta tiene un archivo específico" {
@@ -50,28 +52,28 @@ describe "PdePVC" {
 	}
 
 	test "Punto 2 - Un commit con todos los cambios puede hacerse" {
-		commit.aplicarEn(pdep)
+		commit.aplicar()
 		assert.equals("parcial", pdep.archivoLlamado("leame.md").contenido())
 	}
 
 	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede crearse un archivo que ya existe" {
 		commit.agregarCambio(new Crear(nombreArchivo = "leame.md"))
-		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'leame.md'", { commit.aplicarEn(pdep)})
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'leame.md'", { commit.aplicar()})
 	}
 
 	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede eliminarse un archivo que no existe" {
 		commit.agregarCambio(new Eliminar(nombreArchivo = "parcial.wlk"))
-		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicar()})
 	}
 
 	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede agregarse contenido a un archivo que no existe" {
 		commit.agregarCambio(new Agregar(nombreArchivo = "parcial.wlk", contenido = "hola"))
-		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicar()})
 	}
 
 	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede sacarse contenido a un archivo que no existe" {
 		commit.agregarCambio(new Sacar(nombreArchivo = "parcial.wlk", contenido = "hola"))
-		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicar()})
 	}
 
 	test "Punto 3 - Checkoutear una branch" {

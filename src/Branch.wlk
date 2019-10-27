@@ -1,10 +1,10 @@
 class Branch {
 
-	const property carpeta
 	const property commits = []
+	const property colaboradores = []
 
 	method checkout() {
-		commits.forEach { commit => commit.aplicarEn(carpeta) }
+		commits.forEach { commit => commit.aplicar() }
 	}
 
 	method agregarCommit(unCommit) {

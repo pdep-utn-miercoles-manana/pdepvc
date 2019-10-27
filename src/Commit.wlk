@@ -1,10 +1,11 @@
 class Commit {
 
+	const property carpeta
 	const property descripcion
 	const property cambios = []
 
-	method aplicarEn(unaCarpeta) {
-		cambios.forEach { cambio => cambio.aplicarEn(unaCarpeta) }
+	method aplicar() {
+		cambios.forEach { cambio => cambio.aplicarEn(carpeta) }
 	}
 
 	method agregarCambio(unCambio) {
@@ -16,7 +17,7 @@ class Commit {
 	}
 	
 	method revert() {
-		return new Commit(descripcion = "revert " + descripcion, cambios = self.revertirCambios())
+		return new Commit(descripcion = "revert " + descripcion, cambios = self.revertirCambios(), carpeta = carpeta)
 	}
 	
 	method revertirCambios() {
