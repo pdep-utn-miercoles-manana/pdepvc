@@ -4,6 +4,7 @@ import Commit.*
 import Cambio.*
 import Branch.*
 import Usuario.*
+import Rol.*
 
 describe "PdePVC" {
 
@@ -15,15 +16,25 @@ describe "PdePVC" {
 	var otroCommit
 	var nuevoCommit
 	var master
+	var desarrollo
 	var feli
+	var fede
+	var juan
+	var ale
 
 	fixture {
+
+		feli = new Usuario(rol = administrador)
+		fede = new Usuario(rol = administrador)
+		juan = new Usuario(rol = comun)
+		ale = new Usuario(rol = comun)
+		
 		bartxt = new Archivo(nombre = "bar.txt", contenido = "Buen día!")
 		baztxt = new Archivo(nombre = "baz.txt", contenido = "Buenas noches!")
 		foodir = new Carpeta(nombre = "Foo", archivos = [ bartxt, baztxt ])
 		pdep = new Carpeta(nombre = "pdep", archivos = [])
 		
-		commit = new Commit(descripcion = "Hago muchos cambios", carpeta = pdep)
+		commit = new Commit(descripcion = "Hago muchos cambios", carpeta = pdep, autor = feli)
 		
 		commit.agregarCambio(new Crear(nombreArchivo = "leame.md"))
 		commit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
@@ -31,18 +42,19 @@ describe "PdePVC" {
 		commit.agregarCambio(new Agregar(nombreArchivo = "leame.md", contenido = "parciallala"))
 		commit.agregarCambio(new Sacar(nombreArchivo = "leame.md", contenido = "lala"))
 		
-		otroCommit = new Commit(descripcion = "Agrego parcial.wlk", carpeta = pdep)
+		otroCommit = new Commit(descripcion = "Agrego parcial.wlk", carpeta = pdep, autor = fede)
 		otroCommit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
 		otroCommit.agregarCambio(new Agregar(nombreArchivo = "parcial.wlk", contenido = "object pepita {}"))
 		
-		nuevoCommit = new Commit(descripcion = "Agrego archivo hola.txt", carpeta = pdep)
+		nuevoCommit = new Commit(descripcion = "Agrego archivo hola.txt", carpeta = pdep, autor = feli)
 		nuevoCommit.agregarCambio(new Crear(nombreArchivo = "hola.txt"))
 		
-		master = new Branch()
+		master = fede.crearBranch([juan])
 		master.agregarCommit(commit)
 		master.agregarCommit(otroCommit)
 		
-		feli = new Usuario()
+		desarrollo = feli.crearBranch([ale])
+		
 	}
 
 	test "Punto 1 - Una carpeta tiene un archivo específico" {
@@ -107,7 +119,30 @@ describe "PdePVC" {
 	}
 
 	test "Punto 6 - Un usuario crea una branch y se agrega como colaborador" {
-		assert.equals([feli], feli.crearBranch([]).colaboradores())
+		assert.that(desarrollo.colaboradores().contains(feli))
 	}
 
+	test "Punto 7 - Un commit de un autor puede agregarse si es administrador y colaborador" {
+		const unCommit = new Commit(autor = feli, carpeta = foodir, descripcion = "Commitardo")		
+		assert.that(unCommit.puedeAgregarseA(desarrollo))
+	}
+
+	test "Punto 7 - Un commit de un autor puede agregarse si es administrador" {
+		const unCommit = new Commit(autor = fede, carpeta = foodir, descripcion = "Commitardo")		
+		assert.that(unCommit.puedeAgregarseA(desarrollo))
+	}
+
+	test "Punto 7 - Un commit de un autor puede agregarse si es colaborador" {
+		const unCommit = new Commit(autor = ale, carpeta = foodir, descripcion = "Commitardo")		
+		assert.that(unCommit.puedeAgregarseA(desarrollo))
+	}
+
+	test "Punto 7 - Un commit de un autor no puede agregarse si no es administrador ni colaborador" {
+		const unCommit = new Commit(autor = juan, carpeta = foodir, descripcion = "Commitardo")		
+		assert.notThat(unCommit.puedeAgregarseA(desarrollo))
+	}
+
+	test "Punto 8 - Blame de una branch" {
+		assert.equals([feli, fede], master.blame("parcial.wlk"))
+	}
 }

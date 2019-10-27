@@ -1,5 +1,6 @@
 class Commit {
 
+	const property autor
 	const property carpeta
 	const property descripcion
 	const property cambios = []
@@ -17,11 +18,14 @@ class Commit {
 	}
 	
 	method revert() {
-		return new Commit(descripcion = "revert " + descripcion, cambios = self.revertirCambios(), carpeta = carpeta)
+		return new Commit(descripcion = "revert " + descripcion, cambios = self.revertirCambios(), carpeta = carpeta, autor = autor)
 	}
 	
 	method revertirCambios() {
 		return cambios.reverse().map { cambio => cambio.revert() }
 	}
 	
+	method puedeAgregarseA(unaBranch) {
+		return autor.puedeCommitearEn(unaBranch)
+	}
 }
