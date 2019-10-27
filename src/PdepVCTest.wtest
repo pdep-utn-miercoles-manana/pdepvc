@@ -15,6 +15,7 @@ describe "PdePVC" {
 	var otroCommit
 	var nuevoCommit
 	var master
+	var feli
 
 	fixture {
 		bartxt = new Archivo(nombre = "bar.txt", contenido = "Buen día!")
@@ -41,6 +42,7 @@ describe "PdePVC" {
 		master.agregarCommit(commit)
 		master.agregarCommit(otroCommit)
 		
+		feli = new Usuario()
 	}
 
 	test "Punto 1 - Una carpeta tiene un archivo específico" {
@@ -102,6 +104,10 @@ describe "PdePVC" {
 	test "Punto 5 - revert de un commit crea un commit con la misma cantidad de cambios" {
 		const commitRevertido = otroCommit.revert()
 		assert.equals(2, commitRevertido.cambios().size())
+	}
+
+	test "Punto 6 - Un usuario crea una branch y se agrega como colaborador" {
+		assert.equals([feli], feli.crearBranch([]).colaboradores())
 	}
 
 }
