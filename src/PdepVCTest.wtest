@@ -1,24 +1,64 @@
 import Carpeta.*
 import Archivo.*
+import Commit.*
+import Cambio.*
 
 describe "PdePVC" {
-	
+
 	var foodir
 	var bartxt
 	var baztxt
-	
+	var pdep
+	var commit
+
 	fixture {
 		bartxt = new Archivo(nombre = "bar.txt", contenido = "Buen día!")
 		baztxt = new Archivo(nombre = "baz.txt", contenido = "Buenas noches!")
-		foodir = new Carpeta(nombre = "Foo", archivos = [bartxt, baztxt])
+		
+		foodir = new Carpeta(nombre = "Foo", archivos = [ bartxt, baztxt ])
+		pdep = new Carpeta(nombre = "pdep", archivos = [])
+		
+		commit = new Commit(descripcion = "Hago muchos cambios")
+		
+		commit.agregarCambio(new Crear(nombreArchivo = "leame.md"))
+		commit.agregarCambio(new Crear(nombreArchivo = "parcial.wlk"))
+		commit.agregarCambio(new Eliminar(nombreArchivo = "parcial.wlk"))
+		commit.agregarCambio(new Agregar(nombreArchivo = "leame.md", contenido = "parciallala"))
+		commit.agregarCambio(new Sacar(nombreArchivo = "leame.md", contenido = "lala"))
 	}
-	
+
 	test "Punto 1 - Una carpeta tiene un archivo específico" {
 		assert.that(foodir.tiene("bar.txt"))
 	}
-	
+
 	test "Punto 1 - Una carpeta no tiene un archivo específico" {
 		assert.notThat(foodir.tiene("sas.txt"))
 	}
-	
+
+	test "Punto 2 - Un commit con todos los cambios puede hacerse" {
+		commit.aplicarEn(pdep)
+		assert.equals("parcial", pdep.archivoLlamado("leame.md").contenido())
+	}
+
+	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede crearse un archivo que ya existe" {
+		commit.agregarCambio(new Crear(nombreArchivo = "leame.md"))
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'leame.md'", { commit.aplicarEn(pdep)})
+	}
+
+	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede eliminarse un archivo que no existe" {
+		commit.agregarCambio(new Eliminar(nombreArchivo = "parcial.wlk"))
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+	}
+
+	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede agregarse contenido a un archivo que no existe" {
+		commit.agregarCambio(new Agregar(nombreArchivo = "parcial.wlk", contenido = "hola"))
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+	}
+
+	test "Punto 2 - Debería interrumpirse la aplicacion de cambios si no puede sacarse contenido a un archivo que no existe" {
+		commit.agregarCambio(new Sacar(nombreArchivo = "parcial.wlk", contenido = "hola"))
+		assert.throwsExceptionWithMessage("Carpeta 'pdep': No se puede realizar el cambio en el archivo 'parcial.wlk'", { commit.aplicarEn(pdep)})
+	}
+
 }
+
